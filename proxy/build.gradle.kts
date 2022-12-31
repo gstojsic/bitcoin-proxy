@@ -42,6 +42,7 @@ publishing {
             pom {
                 name.set(project.name)
                 description.set("A java lib to access bitcoind nodes via JSON RPC")
+                url.set("https://github.com/gstojsic/bitcoin-proxy")
                 licenses {
                     license {
                         name.set("MIT License")
@@ -51,6 +52,13 @@ publishing {
                 scm {
                     connection.set("scm:git:git@github.com:gstojsic/bitcoin-proxy.git")
                     url.set("https://github.com/gstojsic/bitcoin-proxy")
+                }
+                developers {
+                    developer {
+                        id.set("gstojsic")
+                        name.set("Goran Stojšić")
+                        email.set("goran.stojsic@gmail.com")
+                    }
                 }
             }
         }
