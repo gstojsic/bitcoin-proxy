@@ -1,3 +1,4 @@
 rootProject.name = "bitcoin-proxy"
-include("rpc")
+include("proxy")
 include("app")
+include("json-parse")

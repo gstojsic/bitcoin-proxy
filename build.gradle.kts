@@ -3,10 +3,10 @@ plugins {
 }
 
 allprojects {
-    group = "org.bitcoin.proxy"
-    version = "1.0-SNAPSHOT"
-}
+    group = "io.github.gstojsic.bitcoin"
+    version = "0.9-SNAPSHOT"
 
-repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+    }
 }

@@ -10,3 +10,4 @@ out/
 
 #misc
 local/
+/proxy/src/test/resources/settings.properties

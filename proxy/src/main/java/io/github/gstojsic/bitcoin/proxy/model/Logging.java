@@ -1,0 +1,31 @@
+package io.github.gstojsic.bitcoin.proxy.model;
+
+public enum Logging {
+    all,
+    addrman,
+    bench,
+    blockstorage,
+    cmpctblock,
+    coindb,
+    estimatefee,
+    http,
+    i2p,
+    ipc,
+    leveldb,
+    libevent,
+    mempool,
+    mempoolrej,
+    net,
+    proxy,
+    prune,
+    qt,
+    rand,
+    reindex,
+    rpc,
+    selectcoins,
+    tor,
+    util,
+    validation,
+    walletdb,
+    zmq
+}
