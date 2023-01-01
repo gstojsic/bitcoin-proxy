@@ -1,8 +1,8 @@
 # bitcoin-proxy
-bitcoin-proxy is a java library that allows access to bitcoin nodes from java applications. It features:
+bitcoin-proxy is a java JSON-RPC client that allows access to bitcoin nodes from java applications. It features:
 
-- bitcoin v23 API
-- sync and async API
+- bitcoin v23 JSON-RPC API
+- sync and async client
 - small footprint (less than 600kB)
 - no external dependencies
 
