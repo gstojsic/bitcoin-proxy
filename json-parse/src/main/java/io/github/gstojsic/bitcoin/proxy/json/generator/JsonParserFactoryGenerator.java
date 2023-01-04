@@ -326,6 +326,27 @@ public class JsonParserFactoryGenerator {
                             parsedObj.getEnclosedElements(),
                             imports
                     );
+                } else if (c.fieldType() == FieldType.CUSTOM) {
+                    var imports = getAdditionalImports(declaredParseObj);
+                    if (!c.packageName().startsWith("java.lang"))
+                        imports.add(c.packageName() + "." + c.parserName());
+
+                    return new ParserSourceContext(
+                            resolvedType,
+                            FieldType.LIST,
+                            null,
+                            null,
+                            c.parserName(),
+                            c.listParsing(),
+                            c.fieldType(),
+                            null,
+                            depth,
+                            null,
+                            null,
+                            emptyMap(),
+                            emptyList(),
+                            imports
+                    );
                 } else if (c.fieldType() == FieldType.NUMBER) {
                     String listParsing = resolveListNumberParser(c.type());
                     return new ParserSourceContext(
@@ -333,7 +354,7 @@ public class JsonParserFactoryGenerator {
                             FieldType.LIST,
                             null,
                             null,
-                            null,
+                            "BaseJsonInput",
                             listParsing,
                             c.fieldType(),
                             null,
@@ -350,7 +371,7 @@ public class JsonParserFactoryGenerator {
                             FieldType.LIST,
                             null,
                             null,
-                            null,
+                            "BaseJsonInput",
                             "parseStringList",
                             c.fieldType(),
                             null,
@@ -367,7 +388,7 @@ public class JsonParserFactoryGenerator {
                             FieldType.LIST,
                             null,
                             null,
-                            null,
+                            "BaseJsonInput",
                             "parseBooleanList",
                             c.fieldType(),
                             null,

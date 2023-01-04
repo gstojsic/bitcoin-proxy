@@ -73,9 +73,7 @@ public class ${parserName} {
                 }
                 <#elseif field.type == "CUSTOM">
                 case "${field.name}" -> {
-                    var o = new ${field.parserName}();
-                    o.${field.listParsing}(input);
-                    parsed.${field.setter}(o);
+                    parsed.${field.setter}(${field.parserName}.${field.listParsing}(input));
                     nextSeparator = input.readCommaOrObjectEnd();
                 }
                 </#if>
@@ -113,7 +111,7 @@ public class ${parserName} {
 
 <#macro generateParseListRest field depth><#compress>
     <#if depth == field.listDepth>
-    BaseJsonInput::parseStringList,
+    ${field.parserName}::${field.listParsing},
     <#else>
     i${depth} -> BaseJsonInput.parseList(i${depth},
     <@generateParseListRest field depth+1/>

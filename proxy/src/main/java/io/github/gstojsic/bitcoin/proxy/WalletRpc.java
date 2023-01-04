@@ -8,6 +8,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.BumpFee;
 import io.github.gstojsic.bitcoin.proxy.json.model.Descriptors;
 import io.github.gstojsic.bitcoin.proxy.json.model.DumpFile;
 import io.github.gstojsic.bitcoin.proxy.json.model.ImportMultiResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ListAddressGrouping;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.PsbtBumpFee;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
@@ -208,7 +209,7 @@ public interface WalletRpc {
     /**
      * @see WalletRpcAsync#listAddressGroupings()
      */
-    List<List<List<String>>> listAddressGroupings();
+    List<List<ListAddressGrouping>> listAddressGroupings();
 
     /**
      * @see WalletRpcAsync#listDescriptors(Boolean)

@@ -8,6 +8,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.BumpFee;
 import io.github.gstojsic.bitcoin.proxy.json.model.Descriptors;
 import io.github.gstojsic.bitcoin.proxy.json.model.DumpFile;
 import io.github.gstojsic.bitcoin.proxy.json.model.ImportMultiResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ListAddressGrouping;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.PsbtBumpFee;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
@@ -385,15 +386,14 @@ public interface WalletRpcAsync {
     CompletableFuture<Void> keypoolRefill(Integer newSize);
 
     /**
-     * TODO this is not done
      * <p>Calls listaddressgroupings method on the bitcoin node which lists groups of addresses which have had their
      * common ownership made public by common use as inputs or as the resulting change in past transactions</p>
      * Get more info with:<br/>
      * <pre>client.help(Command.listaddressgroupings);</pre>
      *
-     * @return TODO. See {@link TODO}
+     * @return groups of addresses. See {@link ListAddressGrouping}
      */
-    CompletableFuture<List<List<List<String>>>> listAddressGroupings();
+    CompletableFuture<List<List<ListAddressGrouping>>> listAddressGroupings();
 
     /**
      * <p>Calls listdescriptors method on the bitcoin node which returns a list of descriptors imported into

@@ -31,6 +31,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.FinalizedPsbt;
 import io.github.gstojsic.bitcoin.proxy.json.model.GeneratedBlock;
 import io.github.gstojsic.bitcoin.proxy.json.model.ImportMultiResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.IndexInfo;
+import io.github.gstojsic.bitcoin.proxy.json.model.ListAddressGrouping;
 import io.github.gstojsic.bitcoin.proxy.json.model.MemoryInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolAccept;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
@@ -750,7 +751,7 @@ public class BitcoinProxy implements BtcRpc {
     }
 
     @Override
-    public List<List<List<String>>> listAddressGroupings() {
+    public List<List<ListAddressGrouping>> listAddressGroupings() {
         return doGet(client.listAddressGroupings());
     }
 

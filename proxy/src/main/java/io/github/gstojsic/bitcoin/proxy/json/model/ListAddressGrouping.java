@@ -8,8 +8,19 @@ import static io.github.gstojsic.bitcoin.proxy.json.BaseJsonInput.ARRAY_END;
 
 public class ListAddressGrouping {
 
+    /**
+     * The bitcoin address
+     */
     private String address;
+
+    /**
+     * The amount in BTC
+     */
     private double amount;
+
+    /**
+     * The label if set
+     */
     private String label;
 
     public String getAddress() {
@@ -25,35 +36,30 @@ public class ListAddressGrouping {
     }
 
     @CustomParser
-    public void parse(BaseJsonInput input) {
+    public static ListAddressGrouping parse(BaseJsonInput input) {
+        ListAddressGrouping grouping = new ListAddressGrouping();
         Character c = input.startListOrNull();
         if (c == null)
-            return;
+            return grouping;
 
-        address = input.readStringOrNull();
+        grouping.address = input.readStringOrNull();
         c = input.readCommaOrListEnd();
         if (c == ARRAY_END)
-            return;
+            return grouping;
 
         Object[] res = input.readNumberOrNull();
         if (res != null) {
-            amount = Double.parseDouble((String) res[0]);
+            grouping.amount = Double.parseDouble((String) res[0]);
             c = (char) res[1];
         } else
             c = input.readCommaOrObjectEnd();
 
         if (c == ARRAY_END)
-            return;
-        label = input.readStringOrNull();
+            return grouping;
+        grouping.label = input.readStringOrNull();
         c = input.readCommaOrListEnd();
         if (c != ARRAY_END)
             throw new IllegalStateException("invalid ListAddressGrouping format");
+        return grouping;
     }
-    /*
-        [
-          "bcrt1q8h8z7f8xxytj9f65v6wx4vfuud48v3vs6kglw7",
-          "50.00000000",
-          "aliceMining"
-        ]
-     */
 }

@@ -34,6 +34,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.FinalizedPsbt;
 import io.github.gstojsic.bitcoin.proxy.json.model.GeneratedBlock;
 import io.github.gstojsic.bitcoin.proxy.json.model.ImportMultiResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.IndexInfo;
+import io.github.gstojsic.bitcoin.proxy.json.model.ListAddressGrouping;
 import io.github.gstojsic.bitcoin.proxy.json.model.MemoryInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolAccept;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
@@ -1586,9 +1587,9 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
     }
 
     @Override
-    public CompletableFuture<List<List<List<String>>>> listAddressGroupings() {
+    public CompletableFuture<List<List<ListAddressGrouping>>> listAddressGroupings() {
         return send(listAddressGroupingsRequest, HttpResponse.BodyHandlers.ofInputStream())
-                .thenApply(parsers::parseJrListAddressGroupings)
+                .thenApply(parsers::parseJrListAddressGrouping)
                 .thenApply(this::checkRpcResponse);
     }
 

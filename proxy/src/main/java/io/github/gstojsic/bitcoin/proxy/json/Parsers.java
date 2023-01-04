@@ -215,9 +215,7 @@ public interface Parsers {
 
     RpcResponse<Signers> parseJrSigners(InputStream stream);
 
-    RpcResponse<List<List<List<String>>>> parseJrListAddressGroupings(InputStream stream);
-
-    RpcResponse<ListAddressGrouping> parseJrListAddressGrouping(InputStream stream);
+    RpcResponse<List<List<ListAddressGrouping>>> parseJrListAddressGrouping(InputStream stream);
 
     RpcResponse<ScanTxOutResult> parseJrScanTxOutResult(InputStream stream);
 

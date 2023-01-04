@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInfo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.github.gstojsic.bitcoin.proxy.util.Util.getTestName;
 import static org.junit.jupiter.api.Assertions.*;
@@ -178,8 +179,19 @@ public class RawTransactionTest extends BitcoinDockerBase {
         assertEquals(send, bobBalance);
         var bobUnspent = bobProxy.listUnspent(null, null, null, null, null).get(0);
         assertTrue(bobUnspent.getDesc().startsWith("wpkh")); //segwit
-        //var s = aliceProxy.listAddressGroupings(); //TODO
-        // System.out.println(s);
+        var groupings = aliceProxy.listAddressGroupings();
+        assertEquals(1, groupings.size());
+        var grouping = groupings.get(0);
+        assertEquals(2, grouping.size());
+        var part = grouping.stream().collect(Collectors.partitioningBy(c -> "aliceMining".equals(c.getLabel())));
+        var aliceMiningGroup = part.get(true);
+        assertEquals(1, aliceMiningGroup.size());
+        var aliceMining = aliceMiningGroup.get(0);
+        assertEquals("aliceMining", aliceMining.getLabel());
+        var otherGroup = part.get(false);
+        assertEquals(1, otherGroup.size());
+        var other = otherGroup.get(0);
+        assertNull(other.getLabel());
     }
 
     @Test

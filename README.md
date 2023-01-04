@@ -10,20 +10,20 @@ bitcoin-proxy is a java JSON-RPC client that allows access to bitcoin nodes from
 The proxy requires a bitcoin node to connect to. For details on how to install a bitcoind node please refer
 to the [Bitcoin documentation][bitcoinDoc].
 
-The project tests use testcontainers to run a bitcoin node in a docker container so docker needs to be installed to run
+The project tests use [testcontainers][testcontainers] to run a bitcoin node in a docker container so docker needs to be installed to run
 tests.
 
 ## usage
 To use the proxy first you have to add it as a dependency to your gradle project:
 ```gradle
-implementation("io.github.gstojsic.bitcoin:proxy:0.9")
+implementation("io.github.gstojsic.bitcoin:proxy:1.0")
 ```
 or maven project:
 ```maven
 <dependency>
     <groupId>io.github.gstojsic.bitcoin</groupId>
     <artifactId>proxy</artifactId>
-    <version>0.9</version>
+    <version>1.0</version>
 </dependency>
 ```
 
@@ -44,3 +44,4 @@ command line from which I derived many of the tests in the project.
 
 [bitcoinDoc]: https://github.com/bitcoin/bitcoin/tree/master/doc#setup
 [bitcoinCliBook]: https://github.com/BlockchainCommons/Learning-Bitcoin-from-the-Command-Line
+[testcontainers]: https://www.testcontainers.org/
