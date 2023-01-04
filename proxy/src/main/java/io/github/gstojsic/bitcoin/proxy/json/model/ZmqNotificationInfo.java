@@ -14,7 +14,7 @@ public class ZmqNotificationInfo {
     /**
      * (numeric) Outbound message high water mark
      */
-    private String hwm;
+    private int hwm;
 
     public String getType() {
         return type;
@@ -32,11 +32,11 @@ public class ZmqNotificationInfo {
         this.address = address;
     }
 
-    public String getHwm() {
+    public int getHwm() {
         return hwm;
     }
 
-    public void setHwm(String hwm) {
+    public void setHwm(int hwm) {
         this.hwm = hwm;
     }
 }

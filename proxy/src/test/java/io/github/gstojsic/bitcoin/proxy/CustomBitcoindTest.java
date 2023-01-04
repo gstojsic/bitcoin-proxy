@@ -2,6 +2,7 @@ package io.github.gstojsic.bitcoin.proxy;
 
 import io.github.gstojsic.bitcoin.proxy.json.model.BlockFilter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -11,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.gstojsic.bitcoin.proxy.util.Const.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static io.github.gstojsic.bitcoin.proxy.util.Util.getTestName;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 public class CustomBitcoindTest {
@@ -59,6 +60,34 @@ public class CustomBitcoindTest {
             assertNotNull(verified);
             assertEquals(1, verified.size());
             assertEquals(tx.getTxId(), verified.get(0));
+        });
+    }
+
+    @Test
+    void getZmqNotifications(TestInfo info) {
+        final int ZMQ_PORT = 28332;
+        final String ZMQ_ADDRESS = "tcp://*:%d".formatted(ZMQ_PORT);
+        createCustom(fromBase(
+                "-zmqpubhashtx=%s".formatted(ZMQ_ADDRESS),
+                "-zmqpubhashblock=%s".formatted(ZMQ_ADDRESS),
+                "-zmqpubrawblock=%s".formatted(ZMQ_ADDRESS),
+                "-zmqpubrawtx=%s".formatted(ZMQ_ADDRESS),
+                "-zmqpubsequence=%s".formatted(ZMQ_ADDRESS),
+                "-debug=zmq"
+        ), container -> {
+            var proxy = createProxy(getTestName(info), container);
+            var zmq = proxy.getZmqNotifications();
+            assertFalse(zmq.isEmpty());
+            var pubHashTx = zmq.stream().filter(z -> "pubhashtx".equals(z.getType())).findFirst().orElseThrow();
+            assertEquals(ZMQ_ADDRESS, pubHashTx.getAddress());
+            var pubHashBlock = zmq.stream().filter(z -> "pubhashblock".equals(z.getType())).findFirst().orElseThrow();
+            assertEquals(ZMQ_ADDRESS, pubHashBlock.getAddress());
+            var pubRawBlock = zmq.stream().filter(z -> "pubrawblock".equals(z.getType())).findFirst().orElseThrow();
+            assertEquals(ZMQ_ADDRESS, pubRawBlock.getAddress());
+            var pubRawTx = zmq.stream().filter(z -> "pubrawtx".equals(z.getType())).findFirst().orElseThrow();
+            assertEquals(ZMQ_ADDRESS, pubRawTx.getAddress());
+            var pubSequence = zmq.stream().filter(z -> "pubsequence".equals(z.getType())).findFirst().orElseThrow();
+            assertEquals(ZMQ_ADDRESS, pubSequence.getAddress());
         });
     }
 
