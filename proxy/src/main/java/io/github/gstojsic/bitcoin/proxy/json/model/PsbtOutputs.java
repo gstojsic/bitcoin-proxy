@@ -26,6 +26,21 @@ public class PsbtOutputs {
     private List<Bip32Data> bip32Derivs;
 
     /**
+     * (string, optional) The hex-encoded Taproot x-only internal key
+     */
+    @JsonProperty("taproot_internal_key")
+    private String taprootInternalKey;
+
+    /**
+     * The tuples that make up the Taproot tree, in depth first search order
+     */
+    @JsonProperty("taproot_tree")
+    private List<TaprootTree> taprootTree;
+
+    @JsonProperty("taproot_bip32_derivs")
+    private List<TaprootBip32Deriv> taprootBip32Derivs;
+
+    /**
      * (json object, optional) The unknown global fields
      */
     private Map<String, String> unknown;
@@ -57,6 +72,30 @@ public class PsbtOutputs {
 
     public void setBip32Derivs(List<Bip32Data> bip32Derivs) {
         this.bip32Derivs = bip32Derivs;
+    }
+
+    public String getTaprootInternalKey() {
+        return taprootInternalKey;
+    }
+
+    public void setTaprootInternalKey(String taprootInternalKey) {
+        this.taprootInternalKey = taprootInternalKey;
+    }
+
+    public List<TaprootTree> getTaprootTree() {
+        return taprootTree;
+    }
+
+    public void setTaprootTree(List<TaprootTree> taprootTree) {
+        this.taprootTree = taprootTree;
+    }
+
+    public List<TaprootBip32Deriv> getTaprootBip32Derivs() {
+        return taprootBip32Derivs;
+    }
+
+    public void setTaprootBip32Derivs(List<TaprootBip32Deriv> taprootBip32Derivs) {
+        this.taprootBip32Derivs = taprootBip32Derivs;
     }
 
     public Map<String, String> getUnknown() {

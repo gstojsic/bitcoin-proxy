@@ -2,12 +2,12 @@ package io.github.gstojsic.bitcoin.proxy.json.model;
 
 public class ScriptSig {
     /**
-     * (string) asm
+     * (string) Disassembly of the signature script
      */
     private String asm;
 
     /**
-     * (string) hex
+     * (string) The raw signature script bytes, hex-encoded
      */
     private String hex;
 

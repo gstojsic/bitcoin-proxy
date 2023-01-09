@@ -7,18 +7,23 @@ import java.util.List;
 public class TxInput {
 
     /**
-     * (string) The transaction id
+     * (string, optional) The coinbase value (only if coinbase transaction)
+     */
+    private String coinbase;
+
+    /**
+     * (string, optional) The transaction id (if not coinbase transaction)
      */
     @JsonProperty("txid")
     private String txId;
 
     /**
-     * (numeric) The output number
+     * (numeric, optional) The output number (if not coinbase transaction)
      */
     private int vout;
 
     /**
-     * (json object) The script
+     * (json object) The script (if not coinbase transaction)
      */
     private ScriptSig scriptSig;
 
@@ -39,7 +44,15 @@ public class TxInput {
      * see getblock help for verbose 3
      */
     @JsonProperty("prevout")
-    private List<String> prevOut;
+    private List<PrevOut> prevOut;
+
+    public String getCoinbase() {
+        return coinbase;
+    }
+
+    public void setCoinbase(String coinbase) {
+        this.coinbase = coinbase;
+    }
 
     public String getTxId() {
         return txId;
@@ -81,11 +94,11 @@ public class TxInput {
         this.txInWitness = txInWitness;
     }
 
-    public List<String> getPrevOut() {
+    public List<PrevOut> getPrevOut() {
         return prevOut;
     }
 
-    public void setPrevOut(List<String> prevOut) {
+    public void setPrevOut(List<PrevOut> prevOut) {
         this.prevOut = prevOut;
     }
 }

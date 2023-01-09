@@ -29,7 +29,7 @@ public class CustomBitcoindTest {
             assertEquals(1000, blockCount);
 
             var pruned = c.pruneBlockchain(2);
-            assertEquals(0, pruned);
+            assertEquals(-1, pruned);
         });
     }
 
@@ -92,7 +92,7 @@ public class CustomBitcoindTest {
     }
 
     private void createCustom(List<String> cmd, ContainerConsumer consumer) {
-        try (GenericContainer<?> container = new GenericContainer<>(DOCKER_IMAGE).withCommand(cmd.toArray(String[]::new)).withExposedPorts(RPC_PORT, P2P_PORT);) {
+        try (GenericContainer<?> container = new GenericContainer<>(DOCKER_IMAGE).withCommand(cmd.toArray(String[]::new)).withExposedPorts(RPC_PORT, P2P_PORT)) {
             container.start();
             consumer.accept(container);
         } catch (Exception e) {

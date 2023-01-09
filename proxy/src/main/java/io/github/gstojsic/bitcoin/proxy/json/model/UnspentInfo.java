@@ -2,6 +2,8 @@ package io.github.gstojsic.bitcoin.proxy.json.model;
 
 import io.github.gstojsic.bitcoin.proxy.json.annotation.JsonProperty;
 
+import java.util.List;
+
 public class UnspentInfo {
     /**
      * (string) the transaction id
@@ -86,6 +88,12 @@ public class UnspentInfo {
      * (string, optional) (only when solvable) A descriptor for spending this output
      */
     private String desc;
+
+    /**
+     * List of parent descriptors for the scriptPubKey of this coin.
+     */
+    @JsonProperty("parent_descs")
+    private List<String> parentDescs;
 
     /**
      * (boolean) Whether this output is considered safe to spend. Unconfirmed transactions
@@ -220,6 +228,14 @@ public class UnspentInfo {
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    public List<String> getParentDescs() {
+        return parentDescs;
+    }
+
+    public void setParentDescs(List<String> parentDescs) {
+        this.parentDescs = parentDescs;
     }
 
     public boolean isSafe() {

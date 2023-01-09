@@ -2,7 +2,7 @@ package io.github.gstojsic.bitcoin.proxy.json.model;
 
 public class ScriptPubKey {
     /**
-     * (string)
+     * (string) Disassembly of the public key script
      */
     private String asm;
 
@@ -12,7 +12,7 @@ public class ScriptPubKey {
     private String desc;
 
     /**
-     * (string)
+     * (string) The raw public key script bytes, hex-encoded
      */
     private String hex;
 

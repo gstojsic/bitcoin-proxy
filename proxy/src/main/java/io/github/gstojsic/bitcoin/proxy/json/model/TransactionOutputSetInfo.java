@@ -4,20 +4,20 @@ import io.github.gstojsic.bitcoin.proxy.json.annotation.JsonProperty;
 
 public class TransactionOutputSetInfo {
     /**
-     * (numeric) The current block height (index)
+     * (numeric) The block height (index) of the returned statistics
      */
     private int height;
 
     /**
-     * (string) The hash of the block at the tip of the chain
+     * (string) The hash of the block at which these statistics are calculated
      */
     @JsonProperty("bestblock")
     private String bestBlock;
 
     /**
-     * (numeric) The number of transactions with unspent outputs
+     * (numeric, optional) The number of transactions with unspent outputs (not available when coinstatsindex is used)
      */
-    private int transactions;
+    private Integer transactions;
 
     /**
      * (numeric) The number of unspent transaction outputs
@@ -26,28 +26,46 @@ public class TransactionOutputSetInfo {
     private int txOuts;
 
     /**
-     * (numeric) A meaningless metric for UTXO set size
+     * (numeric) Database-independent, meaningless metric indicating the UTXO set size
      */
     @JsonProperty("bogosize")
     private long bogoSize;
 
     /**
-     * (string) The serialized hash (only present if 'hash_serialized_2' hash_type is chosen)
+     * (string, optional) The serialized hash (only present if 'hash_serialized_2' hash_type is chosen)
      */
     @JsonProperty("hash_serialized_2")
     private String hashSerialized;
 
     /**
-     * (numeric) The estimated size of the chainstate on disk
+     * (string, optional) The serialized hash (only present if 'muhash' hash_type is chosen)
      */
-    @JsonProperty("disk_size")
-    private long diskSize;
+    @JsonProperty("muhash")
+    private String muHash;
 
     /**
-     * (numeric) The total amount
+     * (numeric, optional) The estimated size of the chainstate on disk (not available when coinstatsindex is used)
+     */
+    @JsonProperty("disk_size")
+    private Long diskSize;
+
+    /**
+     * (numeric) The total amount of coins in the UTXO set
      */
     @JsonProperty("total_amount")
     private double totalAmount;
+
+    /**
+     * (numeric, optional) The total amount of coins permanently excluded from the UTXO set (only available if coinstatsindex is used)
+     */
+    @JsonProperty("total_unspendable_amount")
+    private Double totalUnspendableAmount;
+
+    /**
+     * Info on amounts in the block at this block height (only available if coinstatsindex is used)
+     */
+    @JsonProperty("block_info")
+    private TxOutBlockInfo blockInfo;
 
     public int getHeight() {
         return height;
@@ -65,11 +83,11 @@ public class TransactionOutputSetInfo {
         this.bestBlock = bestBlock;
     }
 
-    public int getTransactions() {
+    public Integer getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(int transactions) {
+    public void setTransactions(Integer transactions) {
         this.transactions = transactions;
     }
 
@@ -97,11 +115,19 @@ public class TransactionOutputSetInfo {
         this.hashSerialized = hashSerialized;
     }
 
-    public long getDiskSize() {
+    public String getMuHash() {
+        return muHash;
+    }
+
+    public void setMuHash(String muHash) {
+        this.muHash = muHash;
+    }
+
+    public Long getDiskSize() {
         return diskSize;
     }
 
-    public void setDiskSize(long diskSize) {
+    public void setDiskSize(Long diskSize) {
         this.diskSize = diskSize;
     }
 
@@ -111,5 +137,21 @@ public class TransactionOutputSetInfo {
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public Double getTotalUnspendableAmount() {
+        return totalUnspendableAmount;
+    }
+
+    public void setTotalUnspendableAmount(Double totalUnspendableAmount) {
+        this.totalUnspendableAmount = totalUnspendableAmount;
+    }
+
+    public TxOutBlockInfo getBlockInfo() {
+        return blockInfo;
+    }
+
+    public void setBlockInfo(TxOutBlockInfo blockInfo) {
+        this.blockInfo = blockInfo;
     }
 }

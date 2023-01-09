@@ -42,6 +42,10 @@ abstract public class BitcoinDockerBase {
     }
 
     protected BitcoinProxy createWalletProxy(String wallet) {
+        return createWalletProxy(wallet, false);
+    }
+
+    protected BitcoinProxy createWalletProxy(String wallet, boolean descriptors) {
         BitcoinProxy proxy = new BitcoinProxy(bitcoinDaemon.getHost(), bitcoinDaemon.getMappedPort(RPC_PORT), RPC_USER, RPC_PWD, wallet);
         proxy.createWallet(
                 wallet,
@@ -49,7 +53,7 @@ abstract public class BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                descriptors,
                 null,
                 null);
         return proxy;

@@ -16,7 +16,7 @@ public class WalletFlagInfo {
     private boolean flagState;
 
     /**
-     * (string) Any warnings associated with the change
+     * (string, optional) Any warnings associated with the change
      */
     private String warnings;
 

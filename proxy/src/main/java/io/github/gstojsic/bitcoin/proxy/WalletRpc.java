@@ -9,6 +9,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.Descriptors;
 import io.github.gstojsic.bitcoin.proxy.json.model.DumpFile;
 import io.github.gstojsic.bitcoin.proxy.json.model.ImportMultiResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.ListAddressGrouping;
+import io.github.gstojsic.bitcoin.proxy.json.model.MigrateWalletInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.PsbtBumpFee;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
@@ -16,6 +17,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.SendInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendToAddressInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SignTransactionResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.Signers;
+import io.github.gstojsic.bitcoin.proxy.json.model.SimulateRawTransactionInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionByLabel;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionSinceBlock;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnloadWallet;
@@ -141,12 +143,12 @@ public interface WalletRpc {
     String getRawChangeAddress(AddressType addressType);
 
     /**
-     * @see WalletRpcAsync#getReceivedByAddress(String, Integer, Boolean) 
+     * @see WalletRpcAsync#getReceivedByAddress(String, Integer, Boolean)
      */
     double getReceivedByAddress(String address, Integer minConf, Boolean includeImmatureCoinbase);
 
     /**
-     * @see WalletRpcAsync#getReceivedByLabel(String, Integer, Boolean)  
+     * @see WalletRpcAsync#getReceivedByLabel(String, Integer, Boolean)
      */
     double getReceivedByLabel(String label, Integer minConf, Boolean includeImmatureCoinbase);
 
@@ -246,12 +248,13 @@ public interface WalletRpc {
             Boolean includeImmatureCoinbase);
 
     /**
-     * @see WalletRpcAsync#listSinceBlock(String, Integer, Boolean, Boolean)
+     * @see WalletRpcAsync#listSinceBlock(String, Integer, Boolean, Boolean, Boolean)
      */
     TransactionSinceBlock listSinceBlock(String blockhash,
                                          Integer targetConfirmations,
                                          Boolean includeWatchOnly,
-                                         Boolean includeRemoved);
+                                         Boolean includeRemoved,
+                                         Boolean includeChange);
 
     /**
      * @see WalletRpcAsync#listTransactions(String, Integer, Integer, Boolean)
@@ -288,6 +291,11 @@ public interface WalletRpc {
     boolean lockUnspent(boolean unlock, List<Transaction> transactions);
 
     /**
+     * @see WalletRpcAsync#migrateWallet()
+     */
+    MigrateWalletInfo migrateWallet();
+
+    /**
      * @see WalletRpcAsync#newKeypool()
      */
     void newKeypool();
@@ -317,6 +325,17 @@ public interface WalletRpc {
      */
     SendInfo send(
             Map<String, String> outputs,
+            Integer confTarget,
+            EstimateMode estimateMode,
+            String feeRate,
+            SendOptions sendOptions);
+
+    /**
+     * @see WalletRpcAsync#sendAll(List, Map, Integer, EstimateMode, String, SendOptions)
+     */
+    SendInfo sendAll(
+            List<String> recipientsUnspecified,
+            Map<String, String> recipientsSpecified,
             Integer confTarget,
             EstimateMode estimateMode,
             String feeRate,
@@ -405,6 +424,12 @@ public interface WalletRpc {
      * @see WalletRpcAsync#signRawTransactionWithWallet(String, List, SigHashType)
      */
     SignTransactionResult signRawTransactionWithWallet(String hexTran, List<PrevTx> prevTxs, SigHashType sigHashType);
+
+
+    /**
+     * @see WalletRpcAsync#simulateRawTransaction(List, Boolean) 
+     */
+    SimulateRawTransactionInfo simulateRawTransaction(List<String> rawTxs, Boolean includeWatchOnly);
 
     /**
      * @see WalletRpcAsync#unloadWallet(String, Boolean)

@@ -30,7 +30,7 @@ public class DecodedPsbt {
     private List<PsbtProprietaryData> proprietary;
 
     /**
-     * (json object) The unknown global fields
+     * (json object) The unknown output fields
      */
     private Map<String, String> unknown;
 

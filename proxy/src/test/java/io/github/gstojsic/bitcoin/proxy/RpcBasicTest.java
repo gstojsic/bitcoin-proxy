@@ -245,7 +245,7 @@ public class RpcBasicTest extends BitcoinDockerBase {
                 null,
                 null,
                 null,
-                null,
+                false,
                 null,
                 null);
 
@@ -283,7 +283,7 @@ public class RpcBasicTest extends BitcoinDockerBase {
 
         assertDoesNotThrow(() -> walletProxy.preciousBlock(hashes.get(50)));
 
-        var txOutsetInfo = proxy.getTxOutsetInfo(null);
+        var txOutsetInfo = proxy.getTxOutsetInfo(null, null, null, null);
         assertEquals(hashes.get(100), txOutsetInfo.getBestBlock());
     }
 
@@ -421,6 +421,40 @@ public class RpcBasicTest extends BitcoinDockerBase {
     }
 
     @Test
+    void sendAll(TestInfo info) {
+        var alice = createWalletProxy("alice" + getTestName(info));
+        initialFundWallet(alice);
+
+        var aliceChange = alice.getRawChangeAddress(null);
+
+        var bob = createWalletProxy("bob" + getTestName(info));
+
+        var bobContract1Address = bob.getNewAddress("contract1", null);
+        var bobContract2Address = bob.getNewAddress("contract2", null);
+
+        var sendInfo = alice.sendAll(
+                List.of(aliceChange),
+                Map.of(
+                        bobContract1Address, "1.0",
+                        bobContract2Address, "0.5"
+                ),
+                null,
+                null,
+                null,
+                null);
+        assertTrue(sendInfo.isComplete());
+
+        var transaction = alice.getTransaction(sendInfo.getTxId(), null, null);
+        assertEquals(sendInfo.getTxId(), transaction.getTxId());
+        assertEquals(-1.5, transaction.getAmount());
+        assertEquals(-0.0000172, transaction.getFee());
+        assertEquals(0, transaction.getConfirmations());
+        bob.generateToAddress(1, bob.getNewAddress(null, null), null);
+        var balance = bob.getBalance(null, null, null);
+        assertEquals(1.5, balance);
+    }
+
+    @Test
     void sendMany(TestInfo info) {
         var alice = createWalletProxy("alice" + getTestName(info));
         var unspent = initialFundWallet(alice);
@@ -483,7 +517,7 @@ public class RpcBasicTest extends BitcoinDockerBase {
         var c = createWalletProxy(getTestName(info));
         var unspent = initialFundWallet(c).get(0).getTxId();
         var blockhash = c.getBlockhash(0);
-        var transactions = c.listSinceBlock(blockhash, null, null, null);
+        var transactions = c.listSinceBlock(blockhash, null, null, null, null);
         assertTrue(transactions.getTransactions().stream().anyMatch(t -> unspent.equals(t.getTxId())));
     }
 
@@ -553,7 +587,7 @@ public class RpcBasicTest extends BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                false,
                 null,
                 null);
         var c = createProxy("dumpPrivKey");
@@ -600,7 +634,7 @@ public class RpcBasicTest extends BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                false,
                 null,
                 null);
         var c = createProxy("getWalletInfo");
@@ -626,8 +660,8 @@ public class RpcBasicTest extends BitcoinDockerBase {
     void getNetworkInfo() {
         var info = proxy.getNetworkInfo();
 
-        assertEquals(230000, info.getVersion());
-        assertEquals("/Satoshi:23.0.0/", info.getSubversion());
+        assertEquals(240001, info.getVersion());
+        assertEquals("/Satoshi:24.0.1/", info.getSubversion());
     }
 
     @Test

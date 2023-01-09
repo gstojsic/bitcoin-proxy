@@ -113,7 +113,7 @@ public interface NetworkRpcAsync {
     CompletableFuture<List<NodeAddress>> getNodeAddresses(Integer count, NetworkType networkType);
 
     /**
-     * <p>Calls getpeerinfo method on the bitcoin node which returns data about each connected network node</p>
+     * <p>Calls getpeerinfo method on the bitcoin node which returns data about each connected network peer</p>
      * Get more info with:<br/>
      * <pre>client.help(Command.getpeerinfo);</pre>
      *

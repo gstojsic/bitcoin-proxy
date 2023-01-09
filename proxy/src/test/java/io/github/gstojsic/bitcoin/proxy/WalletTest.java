@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static io.github.gstojsic.bitcoin.proxy.util.Const.*;
+import static io.github.gstojsic.bitcoin.proxy.util.Util.getTestName;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -36,10 +37,7 @@ public class WalletTest {
                     "-printtoconsole",
                     "-rpcallowip=172.17.0.0/16",
                     "-rpcbind=0.0.0.0",
-                    "-rpcauth=%s".formatted(RPC_AUTH),
-                    "-txindex",
-                    "-fallbackfee=0.0001",
-                    "-maxtxfee=0.011"
+                    "-rpcauth=%s".formatted(RPC_AUTH)
             )
             .withExposedPorts(RPC_PORT, P2P_PORT)
             .withFileSystemBind(temp, CONTAINER_BITCOIN_PATH, BindMode.READ_WRITE);
@@ -59,6 +57,20 @@ public class WalletTest {
         return new BitcoinProxy(bitcoinDaemon.getHost(), bitcoinDaemon.getMappedPort(RPC_PORT), RPC_USER, RPC_PWD, wallet);
     }
 
+    protected BitcoinProxy createWalletProxy(String wallet) {
+        BitcoinProxy proxy = new BitcoinProxy(bitcoinDaemon.getHost(), bitcoinDaemon.getMappedPort(RPC_PORT), RPC_USER, RPC_PWD, wallet);
+        proxy.createWallet(
+                wallet,
+                null,
+                null,
+                null,
+                true,
+                false,
+                null,
+                null);
+        return proxy;
+    }
+
     @Test
     void dumpWallet(TestInfo info) throws IOException, InterruptedException {
         //bitcoinDaemon.withFileSystemBind(temp, CONTAINER_BITCOIN_PATH, BindMode.READ_WRITE);
@@ -66,16 +78,7 @@ public class WalletTest {
         if (r.getExitCode() != 0)
             throw new RuntimeException("couldnt execute chmod in container");
 
-        proxy.createWallet(
-                "dumpWallet",
-                null,
-                null,
-                null,
-                true,
-                null,
-                null,
-                null);
-        var c = createProxy("dumpWallet");
+        var c = createWalletProxy(getTestName(info));
         var walletPath = CONTAINER_BITCOIN_PATH + "/dumpWallet.txt";
         var dumpWallet = c.dumpWallet(walletPath);
         assertEquals(walletPath, dumpWallet.getFilename());
@@ -90,34 +93,14 @@ public class WalletTest {
     }
 
     @Test
-    void backupWallet() {
-        proxy.createWallet(
-                "backupWallet",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-
-        var c = createProxy("backupWallet");
+    void backupWallet(TestInfo info) {
+        var c = createWalletProxy(getTestName(info));
         assertDoesNotThrow(() -> c.backupWallet(CONTAINER_BITCOIN_PATH + "/backupWallet.dat"));
     }
 
     @Test
-    void restoreWallet() {
-        proxy.createWallet(
-                "restoreWallet",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-
-        var c = createProxy("restoreWallet");
+    void restoreWallet(TestInfo info) {
+        var c = createWalletProxy(getTestName(info));
         var filename = CONTAINER_BITCOIN_PATH + "/restoreWallet.dat";
         assertDoesNotThrow(() -> c.backupWallet(filename));
 
@@ -127,17 +110,8 @@ public class WalletTest {
     }
 
     @Test
-    void importWallet() {
-        proxy.createWallet(
-                "importWallet",
-                null,
-                null,
-                null,
-                true,
-                null,
-                null,
-                null);
-        var c = createProxy("importWallet");
+    void importWallet(TestInfo info) {
+        var c = createWalletProxy(getTestName(info));
         var walletPath = CONTAINER_BITCOIN_PATH + "/importWallet.txt";
         var dumpWallet = c.dumpWallet(walletPath);
         c.importWallet(dumpWallet.getFilename());
@@ -145,22 +119,21 @@ public class WalletTest {
     }
 
     @Test
-    void loadWallet() {
-        proxy.createWallet(
-                "loadWallet",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-
-        var c = createProxy("loadWallet");
+    void loadWallet(TestInfo info) {
+        var c = createWalletProxy(getTestName(info));
         c.unloadWallet(null, null);
         var filename = CONTAINER_BITCOIN_PATH + "/regtest/wallets/loadWallet";
         var wallet = proxy.loadWallet(filename, false);
         assertTrue(wallet.getName().contains("loadWallet"));
         assertEquals("", wallet.getWarning());
+    }
+
+    @Test
+    void migrateWallet(TestInfo info) {
+        var name = getTestName(info);
+        var c = createWalletProxy(name);
+        var migrateWalletInfo = c.migrateWallet();
+        assertEquals(name, migrateWalletInfo.getWalletName());
+        assertFalse(migrateWalletInfo.getBackupPath().isEmpty());
     }
 }

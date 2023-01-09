@@ -147,5 +147,9 @@ public enum Command {
     generateblock,
     generatetoaddress,
     generatetodescriptor,
-    addpeeraddress
+    addpeeraddress,
+    gettxspendingprevout,
+    migratewallet,
+    sendall,
+    simulaterawtransaction,
 }

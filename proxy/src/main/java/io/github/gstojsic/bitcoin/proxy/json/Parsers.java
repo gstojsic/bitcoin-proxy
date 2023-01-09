@@ -37,6 +37,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.MempoolAccept;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolWithSeq;
+import io.github.gstojsic.bitcoin.proxy.json.model.MigrateWalletInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MiningInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.NetTotals;
@@ -49,15 +50,18 @@ import io.github.gstojsic.bitcoin.proxy.json.model.RawTransaction;
 import io.github.gstojsic.bitcoin.proxy.json.model.RpcInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutsetStatus;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendToAddressInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SignTransactionResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.Signers;
+import io.github.gstojsic.bitcoin.proxy.json.model.SimulateRawTransactionInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionByLabel;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionFunding;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutput;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutputSetInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionSinceBlock;
+import io.github.gstojsic.bitcoin.proxy.json.model.TxSpendingPrevOutInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnloadWallet;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnspentInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.UpgradeWallet;
@@ -234,4 +238,12 @@ public interface Parsers {
     RpcResponse<AddPeerAddress> parseJrAddPeerAddress(InputStream stream);
 
     RpcResponse<FeeEstimate> parseJrFeeEstimate(InputStream stream);
+
+    RpcResponse<List<TxSpendingPrevOutInfo>> parseJrTxSpendingPrevOutInfoList(InputStream stream);
+
+    RpcResponse<MigrateWalletInfo> parseJrMigrateWalletInfo(InputStream stream);
+
+    RpcResponse<SimulateRawTransactionInfo> parseJrSimulateRawTransactionInfo(InputStream stream);
+
+    RpcResponse<ScanTxOutsetStatus> parseJrScanTxOutsetStatus(InputStream stream);
 }

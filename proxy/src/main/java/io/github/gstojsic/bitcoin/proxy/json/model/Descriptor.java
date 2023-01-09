@@ -14,12 +14,13 @@ public class Descriptor {
     private long timestamp;
 
     /**
-     * (boolean) Activeness flag
+     * (boolean) Whether this descriptor is currently used to generate new addresses
      */
     private boolean active;
 
     /**
-     * (boolean, optional) Whether this is an internal or external descriptor; defined only for active descriptors
+     * (boolean, optional) True if this descriptor is used to generate change addresses. False if this descriptor
+     * is used to generate receiving addresses; defined only for active descriptors
      */
     private Boolean internal;
 

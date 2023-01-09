@@ -4,7 +4,7 @@ import org.testcontainers.utility.DockerImageName;
 
 public enum Const {
     ;
-    public static final DockerImageName DOCKER_IMAGE = DockerImageName.parse("ruimarinho/bitcoin-core:23.0");
+    public static final DockerImageName DOCKER_IMAGE = DockerImageName.parse("stole/bitcoin-docker:24.0");
     public static final int RPC_PORT = 18443;
     public static final int P2P_PORT = 18444;
     public static final String RPC_USER = "btcUser";

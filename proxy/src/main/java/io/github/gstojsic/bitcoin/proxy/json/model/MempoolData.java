@@ -74,7 +74,8 @@ public class MempoolData {
     private List<String> spentBy;
 
     /**
-     * (boolean) Whether this transaction could be replaced due to BIP125 (replace-by-fee)
+     * (boolean) Whether this transaction signals BIP125 replaceability or has an unconfirmed ancestor signaling BIP125
+     * replaceability.
      */
     @JsonProperty("bip125-replaceable")
     private boolean bip125Replaceable;

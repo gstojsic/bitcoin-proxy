@@ -3,6 +3,7 @@ package io.github.gstojsic.bitcoin.proxy;
 import io.github.gstojsic.bitcoin.proxy.json.model.BlockStats;
 import io.github.gstojsic.bitcoin.proxy.model.AddressType;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtInput;
+import io.github.gstojsic.bitcoin.proxy.model.Transaction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -99,6 +100,14 @@ public class RawTransactionTest extends BitcoinDockerBase {
         assertEquals("receive", bobTransaction.getCategory());
         assertEquals(txHash, bobTransaction.getTxId());
 
+        var utxoList = List.of(new Transaction(unspent.getTxId(), unspent.getVout()));
+        var foundTxs = bobProxy.getTxSpendingPrevOut(utxoList);
+        assertFalse(foundTxs.isEmpty());
+        var mempoolTx = foundTxs.get(0);
+        assertEquals(unspent.getTxId(), mempoolTx.getTxId());
+        assertEquals(unspent.getVout(), mempoolTx.getVout());
+        assertEquals(txHash, mempoolTx.getSpendingTxId());
+
         bobProxy.generateToAddress(1, address, null);
         var bobBalance = bobProxy.getBalance(null, null, null);
         assertEquals(recAmount, bobBalance);
@@ -129,6 +138,9 @@ public class RawTransactionTest extends BitcoinDockerBase {
                 changeAddress, Double.toString(change)
         );
         var rawTransaction = aliceProxy.createRawTransaction(input, output, null, null, null);
+
+        var simulationInfo = aliceProxy.simulateRawTransaction(List.of(rawTransaction), null);
+        assertEquals(-(send + fee), simulationInfo.getBalanceChange());
 
         var signed = aliceProxy.signRawTransactionWithWallet(rawTransaction, null, null);
 

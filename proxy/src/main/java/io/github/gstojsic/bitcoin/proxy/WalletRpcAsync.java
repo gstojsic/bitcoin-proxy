@@ -9,6 +9,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.Descriptors;
 import io.github.gstojsic.bitcoin.proxy.json.model.DumpFile;
 import io.github.gstojsic.bitcoin.proxy.json.model.ImportMultiResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.ListAddressGrouping;
+import io.github.gstojsic.bitcoin.proxy.json.model.MigrateWalletInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.PsbtBumpFee;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
@@ -16,6 +17,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.SendInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendToAddressInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SignTransactionResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.Signers;
+import io.github.gstojsic.bitcoin.proxy.json.model.SimulateRawTransactionInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionByLabel;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionSinceBlock;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnloadWallet;
@@ -301,7 +303,7 @@ public interface WalletRpcAsync {
      *
      * @param address the Bitcoin address (or hex-encoded script)
      * @param label   an optional label
-     * @param rescan  rescan the wallet for transactions
+     * @param rescan  scan the chain and mempool for wallet transactions
      * @param p2sh    add the P2SH version of the script as well
      * @return void
      */
@@ -324,7 +326,7 @@ public interface WalletRpcAsync {
      * <pre>client.help(Command.importmulti);</pre>
      *
      * @param requests import requests. see {@link ImportData}
-     * @param rescan   Stating if should rescan the blockchain after all imports
+     * @param rescan   scan the chain and mempool for wallet transactions after all imports.
      * @return list of import results. See {@link ImportMultiResult}
      */
     CompletableFuture<List<ImportMultiResult>> importMulti(List<ImportData> requests, Boolean rescan);
@@ -336,7 +338,7 @@ public interface WalletRpcAsync {
      *
      * @param privateKey the private key
      * @param label      an optional label
-     * @param rescan     rescan the wallet for transactions
+     * @param rescan     scan the chain and mempool for wallet transactions.
      * @return void
      */
     CompletableFuture<Void> importPrivKey(String privateKey, String label, Boolean rescan);
@@ -360,7 +362,7 @@ public interface WalletRpcAsync {
      *
      * @param pubKey the hex-encoded public key
      * @param label  an optional label
-     * @param rescan rescan the wallet for transactions
+     * @param rescan scan the chain and mempool for wallet transactions
      * @return void
      */
     CompletableFuture<Void> importPubKey(String pubKey, String label, Boolean rescan);
@@ -472,13 +474,15 @@ public interface WalletRpcAsync {
      * @param targetConfirmations return the nth block hash from the main chain
      * @param includeWatchOnly    include transactions to watch-only addresses
      * @param includeRemoved      show transactions that were removed due to a reorg in the "removed" array
+     * @param includeChange       also add entries for change outputs
      * @return info on transactions since block. See {@link TransactionSinceBlock}
      */
     CompletableFuture<TransactionSinceBlock> listSinceBlock(
             String blockhash,
             Integer targetConfirmations,
             Boolean includeWatchOnly,
-            Boolean includeRemoved);
+            Boolean includeRemoved,
+            Boolean includeChange);
 
     /**
      * <p>Calls listtransactions method on the bitcoin node which returns a list of transactions filtered by invocation
@@ -556,6 +560,16 @@ public interface WalletRpcAsync {
     CompletableFuture<Boolean> lockUnspent(boolean unlock, List<Transaction> transactions);
 
     /**
+     * <p>Calls migratewallet method on the bitcoin node which migrates the wallet to a descriptor wallet.</p>
+     * Get more info with:<br/>
+     * <pre>client.help(Command.migratewallet);</pre>
+     *
+     * @return info on migrated wallet. See {@link MigrateWalletInfo}
+     * @since bitcoin core v.24
+     */
+    CompletableFuture<MigrateWalletInfo> migrateWallet();
+
+    /**
      * <p>Calls newkeypool method on the bitcoin node which entirely clears and refills the keypool</p>
      * Get more info with:<br/>
      * <pre>client.help(Command.newkeypool);</pre>
@@ -629,6 +643,29 @@ public interface WalletRpcAsync {
             SendOptions sendOptions);
 
     /**
+     * <p>Calls sendall method on the bitcoin node which spends the value of all (or specific) confirmed UTXOs in
+     * the wallet to one or more recipients</p>
+     * Get more info with:<br/>
+     * <pre>client.help(Command.sendall);</pre>
+     *
+     * @param recipientsUnspecified list of addresses which receive an equal share of the unspecified amount
+     * @param recipientsSpecified   address -> amount pairs. Each address may only appear once.
+     * @param confTarget            confirmation target in blocks
+     * @param estimateMode          the fee estimate mode
+     * @param feeRate               a fee rate in sat/vB
+     * @param sendOptions           options. see {@link SendOptions}
+     * @return status of send request. See {@link SendInfo}
+     * @since bitcoin core v.24
+     */
+    CompletableFuture<SendInfo> sendAll(
+            List<String> recipientsUnspecified,
+            Map<String, String> recipientsSpecified,
+            Integer confTarget,
+            EstimateMode estimateMode,
+            String feeRate,
+            SendOptions sendOptions);
+
+    /**
      * <p>Calls sendmany method on the bitcoin node which sends multiple times</p>
      * Get more info with:<br/>
      * <pre>client.help(Command.sendmany);</pre>
@@ -636,7 +673,7 @@ public interface WalletRpcAsync {
      * @param amounts         address -> amount pairs
      * @param comment         a comment, if any
      * @param subtractFeeFrom optional list of addresses to subtract the fees from.
-     * @param replaceable     allow this transaction to be replaced by a transaction with higher fees via BIP 125
+     * @param replaceable     signal that this transaction can be replaced by a transaction (BIP 125)
      * @param confTarget      confirmation target in blocks
      * @param estimateMode    the fee estimate mode
      * @param feeRate         specify a fee rate in sat/vB
@@ -659,7 +696,7 @@ public interface WalletRpcAsync {
      * @param amounts         address -> amount pairs
      * @param comment         a comment, if any
      * @param subtractFeeFrom optional list of addresses to subtract the fees from.
-     * @param replaceable     allow this transaction to be replaced by a transaction with higher fees via BIP 125
+     * @param replaceable     signal that this transaction can be replaced by a transaction (BIP 125)
      * @param confTarget      confirmation target in blocks
      * @param estimateMode    the fee estimate mode
      * @param feeRate         specify a fee rate in sat/vB
@@ -685,7 +722,7 @@ public interface WalletRpcAsync {
      * @param commentTo             a comment to store the name of the person or organization to which the coin is
      *                              being sent
      * @param subtractFeeFromAmount the fee will be deducted from the amount being sent
-     * @param replaceable           allow this transaction to be replaced by a transaction with higher fees via BIP 125
+     * @param replaceable           signal that this transaction can be replaced by a transaction (BIP 125)
      * @param confTarget            confirmation target in blocks
      * @param estimateMode          the fee estimate mode
      * @param avoidReuse            avoid spending from dirty addresses
@@ -715,7 +752,7 @@ public interface WalletRpcAsync {
      * @param commentTo             a comment to store the name of the person or organization to which the coin is
      *                              being sent
      * @param subtractFeeFromAmount the fee will be deducted from the amount being sent
-     * @param replaceable           allow this transaction to be replaced by a transaction with higher fees via BIP 125
+     * @param replaceable           signal that this transaction can be replaced by a transaction (BIP 125)
      * @param confTarget            confirmation target in blocks
      * @param estimateMode          the fee estimate mode
      * @param avoidReuse            avoid spending from dirty addresses
@@ -803,6 +840,20 @@ public interface WalletRpcAsync {
             String hexTran,
             List<PrevTx> prevTxs,
             SigHashType sigHashType);
+
+    /**
+     * <p>Calls simulaterawtransaction method on the bitcoin node which calculates the balance change resulting
+     * in the signing and broadcasting of the given transaction(s)</p>
+     * Get more info with:<br/>
+     * <pre>client.help(Command.simulaterawtransaction);</pre>
+     *
+     * @param rawTxs           a list of hex strings of raw transactions
+     * @param includeWatchOnly whether to include watch-only addresses (see RPC importaddress)
+     * @return simulation result. See {@link SimulateRawTransactionInfo}
+     */
+    CompletableFuture<SimulateRawTransactionInfo> simulateRawTransaction(
+            List<String> rawTxs,
+            Boolean includeWatchOnly);
 
     /**
      * <p>Calls unloadwallet method on the bitcoin node which unloads the wallet referenced by the request endpoint

@@ -37,6 +37,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.MempoolAccept;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolWithSeq;
+import io.github.gstojsic.bitcoin.proxy.json.model.MigrateWalletInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MiningInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.NetTotals;
@@ -49,15 +50,18 @@ import io.github.gstojsic.bitcoin.proxy.json.model.RawTransaction;
 import io.github.gstojsic.bitcoin.proxy.json.model.RpcInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutsetStatus;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendToAddressInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SignTransactionResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.Signers;
+import io.github.gstojsic.bitcoin.proxy.json.model.SimulateRawTransactionInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionByLabel;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionFunding;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutput;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutputSetInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionSinceBlock;
+import io.github.gstojsic.bitcoin.proxy.json.model.TxSpendingPrevOutInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnloadWallet;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnspentInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.UpgradeWallet;
@@ -90,7 +94,6 @@ import io.github.gstojsic.bitcoin.proxy.model.NetworkType;
 import io.github.gstojsic.bitcoin.proxy.model.PrevTx;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtDescriptor;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtInput;
-import io.github.gstojsic.bitcoin.proxy.model.ScanTxAction;
 import io.github.gstojsic.bitcoin.proxy.model.SendOptions;
 import io.github.gstojsic.bitcoin.proxy.model.SetBanCommand;
 import io.github.gstojsic.bitcoin.proxy.model.SigHashType;
@@ -251,8 +254,17 @@ public class BitcoinProxy implements BtcRpc {
     }
 
     @Override
-    public TransactionOutputSetInfo getTxOutsetInfo(HashType hashType) {
-        return doGet(client.getTxOutsetInfo(hashType));
+    public TransactionOutputSetInfo getTxOutsetInfo(
+            HashType hashType,
+            String hash,
+            Integer height,
+            Boolean useIndex) {
+        return doGet(client.getTxOutsetInfo(hashType, hash, height, useIndex));
+    }
+
+    @Override
+    public List<TxSpendingPrevOutInfo> getTxSpendingPrevOut(List<Transaction> utxoList) {
+        return doGet(client.getTxSpendingPrevOut(utxoList));
     }
 
     @Override
@@ -271,8 +283,18 @@ public class BitcoinProxy implements BtcRpc {
     }
 
     @Override
-    public ScanTxOutResult scanTxOutset(ScanTxAction action, List<PsbtDescriptor> scanObjects) {
-        return doGet(client.scanTxOutset(action, scanObjects));
+    public ScanTxOutResult scanTxOutset(List<PsbtDescriptor> scanObjects) {
+        return doGet(client.scanTxOutset(scanObjects));
+    }
+
+    @Override
+    public boolean scanTxOutsetAbort() {
+        return doGet(client.scanTxOutsetAbort());
+    }
+
+    @Override
+    public ScanTxOutsetStatus scanTxOutsetStatus() {
+        return doGet(client.scanTxOutsetStatus());
     }
 
     @Override
@@ -790,8 +812,13 @@ public class BitcoinProxy implements BtcRpc {
     }
 
     @Override
-    public TransactionSinceBlock listSinceBlock(String blockhash, Integer targetConfirmations, Boolean includeWatchOnly, Boolean includeRemoved) {
-        return doGet(client.listSinceBlock(blockhash, targetConfirmations, includeWatchOnly, includeRemoved));
+    public TransactionSinceBlock listSinceBlock(
+            String blockhash,
+            Integer targetConfirmations,
+            Boolean includeWatchOnly,
+            Boolean includeRemoved,
+            Boolean includeChange) {
+        return doGet(client.listSinceBlock(blockhash, targetConfirmations, includeWatchOnly, includeRemoved, includeChange));
     }
 
     @Override
@@ -822,6 +849,11 @@ public class BitcoinProxy implements BtcRpc {
     @Override
     public boolean lockUnspent(boolean unlock, List<Transaction> transactions) {
         return doGet(client.lockUnspent(unlock, transactions));
+    }
+
+    @Override
+    public MigrateWalletInfo migrateWallet() {
+        return doGet(client.migrateWallet());
     }
 
     @Override
@@ -857,6 +889,17 @@ public class BitcoinProxy implements BtcRpc {
             String feeRate,
             SendOptions sendOptions) {
         return doGet(client.send(outputs, confTarget, estimateMode, feeRate, sendOptions));
+    }
+
+    @Override
+    public SendInfo sendAll(
+            List<String> recipientsUnspecified,
+            Map<String, String> recipientsSpecified,
+            Integer confTarget,
+            EstimateMode estimateMode,
+            String feeRate,
+            SendOptions sendOptions) {
+        return doGet(client.sendAll(recipientsUnspecified, recipientsSpecified, confTarget, estimateMode, feeRate, sendOptions));
     }
 
     @Override
@@ -959,6 +1002,11 @@ public class BitcoinProxy implements BtcRpc {
     @Override
     public SignTransactionResult signRawTransactionWithWallet(String hexTran, List<PrevTx> prevTxs, SigHashType sigHashType) {
         return doGet(client.signRawTransactionWithWallet(hexTran, prevTxs, sigHashType));
+    }
+
+    @Override
+    public SimulateRawTransactionInfo simulateRawTransaction(List<String> rawTxs, Boolean includeWatchOnly) {
+        return doGet(client.simulateRawTransaction(rawTxs, includeWatchOnly));
     }
 
     @Override

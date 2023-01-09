@@ -13,12 +13,14 @@ import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolWithSeq;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutsetStatus;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutput;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutputSetInfo;
+import io.github.gstojsic.bitcoin.proxy.json.model.TxSpendingPrevOutInfo;
 import io.github.gstojsic.bitcoin.proxy.model.BlockStatOptions;
 import io.github.gstojsic.bitcoin.proxy.model.HashType;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtDescriptor;
-import io.github.gstojsic.bitcoin.proxy.model.ScanTxAction;
+import io.github.gstojsic.bitcoin.proxy.model.Transaction;
 
 import java.util.List;
 import java.util.Map;
@@ -162,9 +164,18 @@ public interface BlockchainRpc {
     String getTxOutProof(List<String> txIds, String blockhash);
 
     /**
-     * @see BlockchainRpcAsync#getTxOutsetInfo(HashType)
+     * @see BlockchainRpcAsync#getTxOutsetInfo(HashType, String, Integer, Boolean)
      */
-    TransactionOutputSetInfo getTxOutsetInfo(HashType hashType);
+    TransactionOutputSetInfo getTxOutsetInfo(
+            HashType hashType,
+            String hash,
+            Integer height,
+            Boolean useIndex);
+
+    /**
+     * @see BlockchainRpcAsync#getTxSpendingPrevOut(List)
+     */
+    List<TxSpendingPrevOutInfo> getTxSpendingPrevOut(List<Transaction> utxoList);
 
     /**
      * @see BlockchainRpcAsync#preciousBlock(String)
@@ -182,9 +193,19 @@ public interface BlockchainRpc {
     DumpFile saveMempool();
 
     /**
-     * @see BlockchainRpcAsync#scanTxOutset(ScanTxAction, List)
+     * @see BlockchainRpcAsync#scanTxOutset(List)
      */
-    ScanTxOutResult scanTxOutset(ScanTxAction action, List<PsbtDescriptor> scanObjects);
+    ScanTxOutResult scanTxOutset(List<PsbtDescriptor> scanObjects);
+
+    /**
+     * @see BlockchainRpcAsync#scanTxOutsetAbort()
+     */
+    boolean scanTxOutsetAbort();
+
+    /**
+     * @see BlockchainRpcAsync#scanTxOutsetStatus()
+     */
+    ScanTxOutsetStatus scanTxOutsetStatus();
 
     /**
      * @see BlockchainRpcAsync#verifyChain(int, int)

@@ -12,7 +12,8 @@ public class WalletTransactionInfo {
     private Boolean involvesWatchOnly;
 
     /**
-     * (string) The bitcoin address of the transaction.
+     * (string, optional) The bitcoin address of the transaction (not returned if the output does not have an address,
+     * e.g. OP_RETURN null data).
      */
     private String address;
 
@@ -95,6 +96,12 @@ public class WalletTransactionInfo {
     private String txId;
 
     /**
+     * (string) The hash of serialized transaction, including witness data.
+     */
+    @JsonProperty("wtxid")
+    private String wtxId;
+
+    /**
      * (json array) Conflicting transaction ids.
      */
     @JsonProperty("walletconflicts")
@@ -134,11 +141,18 @@ public class WalletTransactionInfo {
     private long timeReceived;
 
     /**
-     * (string) ("yes|no|unknown") Whether this transaction could be replaced due to BIP125 (replace-by-fee);
-     * may be unknown for unconfirmed transactions not in the mempool.
+     * (string) ("yes|no|unknown") Whether this transaction signals BIP125 replaceability or has an unconfirmed ancestor
+     * signaling BIP125 replaceability. May be unknown for unconfirmed transactions not in the mempool because their
+     * unconfirmed ancestors are unknown.
      */
     @JsonProperty("bip125-replaceable")
     private String bip125Replaceable;
+
+    /**
+     * Only if 'category' is 'received'. List of parent descriptors for the scriptPubKey of this coin.
+     */
+    @JsonProperty("parent_descs")
+    private List<String> parentDescs;
 
     /**
      * (boolean, optional) 'true' if the transaction has been abandoned (inputs are respendable). Only available for the
@@ -266,6 +280,14 @@ public class WalletTransactionInfo {
         this.txId = txId;
     }
 
+    public String getWtxId() {
+        return wtxId;
+    }
+
+    public void setWtxId(String wtxId) {
+        this.wtxId = wtxId;
+    }
+
     public List<String> getWalletConflicts() {
         return walletConflicts;
     }
@@ -328,6 +350,14 @@ public class WalletTransactionInfo {
 
     public void setBip125Replaceable(String bip125Replaceable) {
         this.bip125Replaceable = bip125Replaceable;
+    }
+
+    public List<String> getParentDescs() {
+        return parentDescs;
+    }
+
+    public void setParentDescs(List<String> parentDescs) {
+        this.parentDescs = parentDescs;
     }
 
     public Boolean getAbandoned() {

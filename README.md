@@ -3,7 +3,7 @@ bitcoin-proxy is a java JSON-RPC client that allows access to bitcoin nodes from
 
 - bitcoin v23 JSON-RPC API
 - sync and async client
-- small footprint (less than 600kB)
+- small footprint (less than 700kB)
 - no external dependencies
 
 ## requirements
@@ -16,14 +16,14 @@ tests.
 ## usage
 To use the proxy first you have to add it as a dependency to your gradle project:
 ```gradle
-implementation("io.github.gstojsic.bitcoin:proxy:1.0")
+implementation("io.github.gstojsic.bitcoin:proxy:2.0")
 ```
 or maven project:
 ```maven
 <dependency>
     <groupId>io.github.gstojsic.bitcoin</groupId>
     <artifactId>proxy</artifactId>
-    <version>1.0</version>
+    <version>2.0</version>
 </dependency>
 ```
 

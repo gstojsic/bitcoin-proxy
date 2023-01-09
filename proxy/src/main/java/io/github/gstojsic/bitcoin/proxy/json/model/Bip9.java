@@ -47,7 +47,7 @@ public class Bip9 {
     private Bip9Statistics statistics;
 
     /**
-     * (string) indicates blocks that signalled with a # and blocks that did not with a -
+     * (string, optional) indicates blocks that signalled with a # and blocks that did not with a -
      */
     private String signalling;
 

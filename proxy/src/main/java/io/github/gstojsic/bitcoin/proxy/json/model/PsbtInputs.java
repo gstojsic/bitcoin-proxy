@@ -85,6 +85,39 @@ public class PsbtInputs {
     private Map<String, String> hash256Preimages;
 
     /**
+     * (string, optional) hex-encoded signature for the Taproot key path spend
+     */
+    @JsonProperty("taproot_key_path_sig")
+    private String taprootKeyPathSig;
+
+    /**
+     * The signatures for the pubkey and leaf hash combination
+     */
+    @JsonProperty("taproot_script_path_sigs")
+    private List<TaprootScriptPathSignature> taprootScriptPathSigs;
+
+    /**
+     * taproot scripts
+     */
+    @JsonProperty("taproot_scripts")
+    private List<TaprootScript> taprootScripts;
+
+    @JsonProperty("taproot_bip32_derivs")
+    private List<TaprootBip32Deriv> taprootBip32Derivs;
+
+    /**
+     * (string, optional) The hex-encoded Taproot x-only internal key
+     */
+    @JsonProperty("taproot_internal_key")
+    private String taprootInternalKey;
+
+    /**
+     * (string, optional) The hex-encoded Taproot merkle root
+     */
+    @JsonProperty("taproot_merkle_root")
+    private String taprootMerkleRoot;
+
+    /**
      * (json object, optional) The unknown input fields
      */
     private Map<String, String> unknown;
@@ -196,6 +229,54 @@ public class PsbtInputs {
 
     public void setHash256Preimages(Map<String, String> hash256Preimages) {
         this.hash256Preimages = hash256Preimages;
+    }
+
+    public String getTaprootKeyPathSig() {
+        return taprootKeyPathSig;
+    }
+
+    public void setTaprootKeyPathSig(String taprootKeyPathSig) {
+        this.taprootKeyPathSig = taprootKeyPathSig;
+    }
+
+    public List<TaprootScriptPathSignature> getTaprootScriptPathSigs() {
+        return taprootScriptPathSigs;
+    }
+
+    public void setTaprootScriptPathSigs(List<TaprootScriptPathSignature> taprootScriptPathSigs) {
+        this.taprootScriptPathSigs = taprootScriptPathSigs;
+    }
+
+    public List<TaprootScript> getTaprootScripts() {
+        return taprootScripts;
+    }
+
+    public void setTaprootScripts(List<TaprootScript> taprootScripts) {
+        this.taprootScripts = taprootScripts;
+    }
+
+    public List<TaprootBip32Deriv> getTaprootBip32Derivs() {
+        return taprootBip32Derivs;
+    }
+
+    public void setTaprootBip32Derivs(List<TaprootBip32Deriv> taprootBip32Derivs) {
+        this.taprootBip32Derivs = taprootBip32Derivs;
+    }
+
+    public String getTaprootInternalKey() {
+        return taprootInternalKey;
+    }
+
+    public void setTaprootInternalKey(String taprootInternalKey) {
+        this.taprootInternalKey = taprootInternalKey;
+    }
+
+    public String getTaprootMerkleRoot() {
+        return taprootMerkleRoot;
+    }
+
+    public void setTaprootMerkleRoot(String taprootMerkleRoot) {
+        this.taprootMerkleRoot = taprootMerkleRoot;
     }
 
     public Map<String, String> getUnknown() {

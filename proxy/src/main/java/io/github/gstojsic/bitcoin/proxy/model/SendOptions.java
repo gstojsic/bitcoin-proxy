@@ -3,15 +3,16 @@ package io.github.gstojsic.bitcoin.proxy.model;
 import java.util.List;
 
 /**
- * @param addInputs              (boolean, optional, default=false) If inputs are specified, automatically include more
- *                               if they are not enough.
+ * @param addInputs              (boolean, optional, default=false when "inputs" are specified, true otherwise) Automatically
+ *                               include coins from the wallet to cover the target amount.
  * @param includeUnsafe          (boolean, optional, default=false) Include inputs that are not safe to spend
  *                               (unconfirmed transactions from outside keys and unconfirmed replacement transactions).
  * @param addToWallet            (boolean, optional, default=true) When false, returns a serialized transaction which
  *                               will not be added to the wallet or broadcast
- * @param changeAddress          (string, optional, default=pool address) The bitcoin address to receive the change
+ * @param changeAddress          (string, optional, default=automatic) The bitcoin address to receive the change
  * @param changePosition         (numeric, optional, default=random) The index of the change output
- * @param changeType             (string, optional, default=set by -changetype) The output type to use.
+ * @param changeType             (string, optional, default=set by -changetype) The output type to use. Only valid if
+ *                               change_address is not specified. Options are "legacy", "p2sh-segwit", "bech32" and "bech32m".
  * @param feeRate                (numeric or string, optional, default=not set, fall back to wallet fee estimation)
  *                               Specify a fee rate in sat/vB.
  * @param includeWatching        (boolean, optional, default=true for watch-only wallets, otherwise false) Also select

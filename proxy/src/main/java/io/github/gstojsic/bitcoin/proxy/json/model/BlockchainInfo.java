@@ -67,7 +67,7 @@ public class BlockchainInfo {
     private boolean pruned;
 
     /**
-     * (numeric, optional) lowest-height complete block stored (only present if pruning is enabled)
+     * (numeric, optional) height of the last block pruned, plus one (only present if pruning is enabled)
      */
     @JsonProperty("pruneheight")
     private long pruneHeight;
@@ -83,8 +83,6 @@ public class BlockchainInfo {
      */
     @JsonProperty("prune_target_size")
     private long pruneTargetSize;
-
-    //  "softforks" : { (json object) (DEPRECATED, returned only if config option -deprecatedrpc=softforks is passed) status of softforks
 
     /**
      * (string) any network and blockchain warnings

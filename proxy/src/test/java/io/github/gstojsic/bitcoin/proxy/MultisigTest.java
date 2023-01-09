@@ -21,7 +21,7 @@ public class MultisigTest extends BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                false,
                 null,
                 null);
 
@@ -33,7 +33,7 @@ public class MultisigTest extends BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                false,
                 null,
                 null);
 
@@ -131,7 +131,7 @@ public class MultisigTest extends BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                false,
                 null,
                 null);
 
@@ -143,7 +143,7 @@ public class MultisigTest extends BitcoinDockerBase {
                 null,
                 null,
                 true,
-                null,
+                false,
                 null,
                 null);
 

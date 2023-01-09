@@ -51,10 +51,10 @@ public class PeerInfo {
     private List<String> servicesNames;
 
     /**
-     * (boolean) Whether peer has asked us to relay transactions to it
+     * (boolean, optional) Whether peer has asked us to relay transactions to it
      */
     @JsonProperty("relaytxes")
-    private boolean relayTxes;
+    private Boolean relayTxes;
 
     /**
      * (numeric) The UNIX epoch time of the last send
@@ -157,6 +157,12 @@ public class PeerInfo {
     private Integer startingHeight;
 
     /**
+     * (numeric, optional) The current height of header pre-synchronization with this peer, or -1 if no low-work sync is in progress
+     */
+    @JsonProperty("presynced_headers")
+    private Integer presyncedHeaders;
+
+    /**
      * (numeric, optional) The last header we have in common with this peer
      */
     @JsonProperty("synced_headers")
@@ -204,10 +210,10 @@ public class PeerInfo {
     private List<String> permissions;
 
     /**
-     * (numeric) The minimum fee rate for transactions this peer accepts
+     * (numeric, optional) The minimum fee rate for transactions this peer accepts
      */
     @JsonProperty("minfeefilter")
-    private double minFeeFilter;
+    private Double minFeeFilter;
 
     /**
      * (numeric) The total bytes sent aggregated by message type
@@ -304,11 +310,11 @@ public class PeerInfo {
         this.servicesNames = servicesNames;
     }
 
-    public boolean isRelayTxes() {
+    public Boolean getRelayTxes() {
         return relayTxes;
     }
 
-    public void setRelayTxes(boolean relayTxes) {
+    public void setRelayTxes(Boolean relayTxes) {
         this.relayTxes = relayTxes;
     }
 
@@ -444,6 +450,14 @@ public class PeerInfo {
         return startingHeight;
     }
 
+    public Integer getPresyncedHeaders() {
+        return presyncedHeaders;
+    }
+
+    public void setPresyncedHeaders(Integer presyncedHeaders) {
+        this.presyncedHeaders = presyncedHeaders;
+    }
+
     public void setStartingHeight(Integer startingHeight) {
         this.startingHeight = startingHeight;
     }
@@ -504,11 +518,11 @@ public class PeerInfo {
         this.permissions = permissions;
     }
 
-    public double getMinFeeFilter() {
+    public Double getMinFeeFilter() {
         return minFeeFilter;
     }
 
-    public void setMinFeeFilter(double minFeeFilter) {
+    public void setMinFeeFilter(Double minFeeFilter) {
         this.minFeeFilter = minFeeFilter;
     }
 

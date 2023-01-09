@@ -81,7 +81,7 @@ public class NetworkInfo {
     private double relayFee;
 
     /**
-     * (numeric) minimum fee rate increment for mempool limiting or BIP 125 replacement in BTC/kvB
+     * (numeric) minimum fee rate increment for mempool limiting or replacement in BTC/kvB
      */
     @JsonProperty("incrementalfee")
     private double incrementalFee;

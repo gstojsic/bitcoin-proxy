@@ -2,6 +2,8 @@ package io.github.gstojsic.bitcoin.proxy.json.model;
 
 import io.github.gstojsic.bitcoin.proxy.json.annotation.JsonProperty;
 
+import java.util.List;
+
 public class WalletTransactionDetails {
 
     @JsonProperty("involvesWatchonly")
@@ -49,6 +51,12 @@ public class WalletTransactionDetails {
      * 'send' category of transactions.
      */
     private Boolean abandoned;
+
+    /**
+     * Only if 'category' is 'received'. List of parent descriptors for the scriptPubKey of this coin.
+     */
+    @JsonProperty("parent_descs")
+    private List<String> parentDescs;
 
     public Boolean getInvolvesWatchOnly() {
         return involvesWatchOnly;
@@ -112,5 +120,13 @@ public class WalletTransactionDetails {
 
     public void setAbandoned(Boolean abandoned) {
         this.abandoned = abandoned;
+    }
+
+    public List<String> getParentDescs() {
+        return parentDescs;
+    }
+
+    public void setParentDescs(List<String> parentDescs) {
+        this.parentDescs = parentDescs;
     }
 }

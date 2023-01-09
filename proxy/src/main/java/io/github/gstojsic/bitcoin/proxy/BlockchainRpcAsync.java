@@ -13,12 +13,14 @@ import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolWithSeq;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutsetStatus;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutput;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutputSetInfo;
+import io.github.gstojsic.bitcoin.proxy.json.model.TxSpendingPrevOutInfo;
 import io.github.gstojsic.bitcoin.proxy.model.BlockStatOptions;
 import io.github.gstojsic.bitcoin.proxy.model.HashType;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtDescriptor;
-import io.github.gstojsic.bitcoin.proxy.model.ScanTxAction;
+import io.github.gstojsic.bitcoin.proxy.model.Transaction;
 
 import java.util.List;
 import java.util.Map;
@@ -315,10 +317,28 @@ public interface BlockchainRpcAsync {
      * Get more info with:<br/>
      * <pre>client.help(Command.gettxoutsetinfo);</pre>
      *
-     * @param hashType Which UTXO set hash should be calculated
+     * @param hashType which UTXO set hash should be calculated
+     * @param hash     hash of target block, or
+     * @param height   height of target block
+     * @param useIndex use coinstatsindex, if available.
      * @return statistics about the unspent transaction output set. See {@link TransactionOutputSetInfo}
      */
-    CompletableFuture<TransactionOutputSetInfo> getTxOutsetInfo(HashType hashType);
+    CompletableFuture<TransactionOutputSetInfo> getTxOutsetInfo(
+            HashType hashType,
+            String hash,
+            Integer height,
+            Boolean useIndex);
+
+    /**
+     * <p>Calls gettxspendingprevout method on the bitcoin node which scans the mempool to find transactions spending
+     * any of the given outputs.</p>
+     * Get more info with:<br/>
+     * <pre>client.help(Command.gettxspendingprevout);</pre>
+     *
+     * @return list of found transactions. See {@link TxSpendingPrevOutInfo}
+     * @since bitcoin core v.24
+     */
+    CompletableFuture<List<TxSpendingPrevOutInfo>> getTxSpendingPrevOut(List<Transaction> utxoList);
 
     /**
      * <p>Calls preciousblock method on the bitcoin node which causes the node to treat a block as if it were received
@@ -351,16 +371,35 @@ public interface BlockchainRpcAsync {
     CompletableFuture<DumpFile> saveMempool();
 
     /**
-     * <p>Calls scantxoutset method on the bitcoin node which Scans the unspent transaction output set for entries
-     * that match certain output descriptors</p>
+     * <p>Calls scantxoutset method on the bitcoin node which starts the scan of the unspent transaction output set for
+     * entries that match certain output descriptors. Action start is implied.</p>
      * Get more info with:<br/>
      * <pre>client.help(Command.scantxoutset);</pre>
      *
-     * @param action      the action to execute
      * @param scanObjects list of scan objects
      * @return an object containing the results of the scan. See {@link ScanTxOutResult}
      */
-    CompletableFuture<ScanTxOutResult> scanTxOutset(ScanTxAction action, List<PsbtDescriptor> scanObjects);
+    CompletableFuture<ScanTxOutResult> scanTxOutset(List<PsbtDescriptor> scanObjects);
+
+    /**
+     * <p>Calls scantxoutset method on the bitcoin node which aborts the scan of the unspent transaction output set for
+     * entries that match certain output descriptors. Action abort is implied.</p>
+     * Get more info with:<br/>
+     * <pre>client.help(Command.scantxoutset);</pre>
+     *
+     * @return true if scan will be aborted (not necessarily before this RPC returns), or false if there is no scan to abort
+     */
+    CompletableFuture<Boolean> scanTxOutsetAbort();
+
+    /**
+     * <p>Calls scantxoutset method on the bitcoin node which gets the status of the scan of the unspent transaction
+     * output set for entries that match certain output descriptors. Action status is implied.</p>
+     * Get more info with:<br/>
+     * <pre>client.help(Command.scantxoutset);</pre>
+     *
+     * @return Approximate percent complete. See {@link ScanTxOutsetStatus}
+     */
+    CompletableFuture<ScanTxOutsetStatus> scanTxOutsetStatus();
 
     /**
      * <p>Calls verifychain method on the bitcoin node which verifies the blockchain database.</p>

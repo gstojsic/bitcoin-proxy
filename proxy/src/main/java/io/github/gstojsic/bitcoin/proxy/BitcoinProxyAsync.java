@@ -40,6 +40,7 @@ import io.github.gstojsic.bitcoin.proxy.json.model.MempoolAccept;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolWithSeq;
+import io.github.gstojsic.bitcoin.proxy.json.model.MigrateWalletInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MiningInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MultisigAddress;
 import io.github.gstojsic.bitcoin.proxy.json.model.NetTotals;
@@ -52,15 +53,18 @@ import io.github.gstojsic.bitcoin.proxy.json.model.RawTransaction;
 import io.github.gstojsic.bitcoin.proxy.json.model.RpcInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutResult;
+import io.github.gstojsic.bitcoin.proxy.json.model.ScanTxOutsetStatus;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SendToAddressInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.SignTransactionResult;
 import io.github.gstojsic.bitcoin.proxy.json.model.Signers;
+import io.github.gstojsic.bitcoin.proxy.json.model.SimulateRawTransactionInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionByLabel;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionFunding;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutput;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionOutputSetInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.TransactionSinceBlock;
+import io.github.gstojsic.bitcoin.proxy.json.model.TxSpendingPrevOutInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnloadWallet;
 import io.github.gstojsic.bitcoin.proxy.json.model.UnspentInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.UpgradeWallet;
@@ -95,7 +99,6 @@ import io.github.gstojsic.bitcoin.proxy.model.NetworkType;
 import io.github.gstojsic.bitcoin.proxy.model.PrevTx;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtDescriptor;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtInput;
-import io.github.gstojsic.bitcoin.proxy.model.ScanTxAction;
 import io.github.gstojsic.bitcoin.proxy.model.SendInput;
 import io.github.gstojsic.bitcoin.proxy.model.SendOptions;
 import io.github.gstojsic.bitcoin.proxy.model.SetBanCommand;
@@ -183,6 +186,9 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
     private final HttpRequest enumerateSignersRequest;
     private final HttpRequest getMemoryInfoRequest;
     private final HttpRequest getMemoryInfoMallocRequest;
+    private final HttpRequest migrateWalletRequest;
+    private final HttpRequest scanTxOutsetAbortRequest;
+    private final HttpRequest scanTxOutsetStatusRequest;
 
     public BitcoinProxyAsync(String host, int port, String user, String password) {
         this(host, port, user, password, null);
@@ -244,6 +250,9 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
         enumerateSignersRequest = getConstRequest(Command.enumeratesigners);
         getMemoryInfoRequest = getConstRequest(Command.getmemoryinfo);
         getMemoryInfoMallocRequest = getRequest(Command.getmemoryinfo, "\"mallocinfo\"");
+        migrateWalletRequest = getConstRequest(Command.migratewallet);
+        scanTxOutsetAbortRequest = getRequest(Command.scantxoutset, "\"abort\"");
+        scanTxOutsetStatusRequest = getRequest(Command.scantxoutset, "\"status\"");
     }
 
     //blockchain rpc
@@ -507,11 +516,30 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
     }
 
     @Override
-    public CompletableFuture<TransactionOutputSetInfo> getTxOutsetInfo(HashType hashType) {
-        hashType = hashType == null ? HashType.hash_serialized_2 : hashType; // set default
-        final HttpRequest request = getRequest(Command.gettxoutsetinfo, jsonStr(hashType.toString()));
+    public CompletableFuture<TransactionOutputSetInfo> getTxOutsetInfo(
+            HashType hashType,
+            String hash,
+            Integer height,
+            Boolean useIndex
+    ) {
+        String strHashType = hashType == null ? HashType.hash_serialized_2.toString() : hashType.toString(); // set default
+        String strHashOrHeight = hash != null ? jsonStr(hash) : (height != null ? Integer.toString(height) : NULL);
+        useIndex = requireNonNullElse(useIndex, true);
+
+        final HttpRequest request = getRequest(Command.gettxoutsetinfo, """
+                "%s",%s,%b\
+                """.formatted(strHashType, strHashOrHeight, useIndex));
         return send(request, HttpResponse.BodyHandlers.ofInputStream())
                 .thenApply(parsers::parseJrTransactionOutputSetInfo)
+                .thenApply(this::checkRpcResponse);
+    }
+
+    @Override
+    public CompletableFuture<List<TxSpendingPrevOutInfo>> getTxSpendingPrevOut(List<Transaction> utxoList) {
+        requireNonNull(utxoList);
+        final HttpRequest request = getRequest(Command.gettxspendingprevout, arrayToStr(utxoList, this::unspentTxToStr));
+        return send(request, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(parsers::parseJrTxSpendingPrevOutInfoList)
                 .thenApply(this::checkRpcResponse);
     }
 
@@ -539,18 +567,28 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
     }
 
     @Override
-    public CompletableFuture<ScanTxOutResult> scanTxOutset(ScanTxAction action, List<PsbtDescriptor> scanObjects) {
-        requireNonNull(action);
-
-        final String params = action == ScanTxAction.start
-                ? """
-                "%s",%s\
-                """.formatted(action, arrayToStr(scanObjects, this::psbtDescriptorToStr))
-                : jsonStr(action.toString());
+    public CompletableFuture<ScanTxOutResult> scanTxOutset(List<PsbtDescriptor> scanObjects) {
+        final String params = """
+                "start",%s\
+                """.formatted(arrayToStr(scanObjects, this::psbtDescriptorToStr));
 
         final HttpRequest request = getRequest(Command.scantxoutset, params);
         return send(request, HttpResponse.BodyHandlers.ofInputStream())
                 .thenApply(parsers::parseJrScanTxOutResult)
+                .thenApply(this::checkRpcResponse);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> scanTxOutsetAbort() {
+        return send(scanTxOutsetAbortRequest, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(parsers::parseJrBoolean)
+                .thenApply(this::checkRpcResponse);
+    }
+
+    @Override
+    public CompletableFuture<ScanTxOutsetStatus> scanTxOutsetStatus() {
+        return send(scanTxOutsetStatusRequest, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(parsers::parseJrScanTxOutsetStatus)
                 .thenApply(this::checkRpcResponse);
     }
 
@@ -935,7 +973,7 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
         if (inputs == null || inputs.isEmpty())
             throw new IllegalArgumentException("inputs is null or empty");
         lockTime = requireNonNullElse(lockTime, 0);
-        replaceable = requireNonNullElse(replaceable, false);
+        replaceable = requireNonNullElse(replaceable, true);
 
         final String sInput = arrayToStr(inputs, this::psbtInputToStr);
         final String sOutput = getPsbtOutputParam(outputAddresses, outputData);
@@ -954,7 +992,7 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
             Boolean replaceable
     ) {
         lockTime = requireNonNullElse(lockTime, 0);
-        replaceable = requireNonNullElse(replaceable, false);
+        replaceable = requireNonNullElse(replaceable, true);
 
         final String sInput = arrayToStr(inputs, this::psbtInputToStr);
         final String sOutput = getPsbtOutputParam(outputAddresses, outputData);
@@ -1322,7 +1360,7 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
         blank = requireNonNullElse(blank, false);
         passphrase = stringOrNull(passphrase);
         avoidReuse = requireNonNullElse(avoidReuse, false);
-        descriptors = requireNonNullElse(descriptors, false);
+        descriptors = requireNonNullElse(descriptors, true);
         String strLoadOnStartup = booleanOrNull(loadOnStartup);
         externalSigner = requireNonNullElse(externalSigner, false);
 
@@ -1660,14 +1698,16 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
             String blockhash,
             Integer targetConfirmations,
             Boolean includeWatchOnly,
-            Boolean includeRemoved
+            Boolean includeRemoved,
+            Boolean includeChange
     ) {
         blockhash = stringOrNull(blockhash);
         targetConfirmations = requireNonNullElse(targetConfirmations, 1);
         includeWatchOnly = requireNonNullElse(includeWatchOnly, false);
         includeRemoved = requireNonNullElse(includeRemoved, true);
+        includeChange = requireNonNullElse(includeChange, false);
         final HttpRequest request = getRequest(Command.listsinceblock,
-                "%s,%d,%b,%b".formatted(blockhash, targetConfirmations, includeWatchOnly, includeRemoved));
+                "%s,%d,%b,%b,%b".formatted(blockhash, targetConfirmations, includeWatchOnly, includeRemoved, includeChange));
         return send(request, HttpResponse.BodyHandlers.ofInputStream())
                 .thenApply(parsers::parseJrTransactionSinceBlock)
                 .thenApply(this::checkRpcResponse);
@@ -1734,9 +1774,16 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
     @Override
     public CompletableFuture<Boolean> lockUnspent(boolean unlock, List<Transaction> transactions) {
         final HttpRequest request = getRequest(Command.lockunspent,
-                "%b,%s".formatted(unlock, arrayToStr(transactions, this::lockUnspentTxToStr)));
+                "%b,%s".formatted(unlock, arrayToStr(transactions, this::unspentTxToStr)));
         return send(request, HttpResponse.BodyHandlers.ofInputStream())
                 .thenApply(parsers::parseJrBoolean)
+                .thenApply(this::checkRpcResponse);
+    }
+
+    @Override
+    public CompletableFuture<MigrateWalletInfo> migrateWallet() {
+        return send(migrateWalletRequest, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(parsers::parseJrMigrateWalletInfo)
                 .thenApply(this::checkRpcResponse);
     }
 
@@ -1810,6 +1857,33 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
         final HttpRequest request = getRequest(Command.send, """
                 %s,%s,"%s",%s,%s\
                 """.formatted(getSendOutputParam(outputs),
+                confirmationTarget,
+                estimateMode.toString(),
+                feeRate,
+                sendOptionsToStr(sendOptions)));
+        return send(request, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(parsers::parseJrSendInfo)
+                .thenApply(this::checkRpcResponse);
+    }
+
+    @Override
+    public CompletableFuture<SendInfo> sendAll(
+            List<String> recipientsUnspecified,
+            Map<String, String> recipientsSpecified,
+            Integer confTarget,
+            EstimateMode estimateMode,
+            String feeRate,
+            SendOptions sendOptions) {
+        requireNonNull(recipientsUnspecified);
+        if (recipientsUnspecified.isEmpty())
+            throw new IllegalArgumentException("recipientsUnspecified must have at least one element");
+
+        String confirmationTarget = integerOrNull(confTarget);
+        estimateMode = requireNonNullElse(estimateMode, EstimateMode.UNSET);
+        feeRate = stringOrNull(feeRate);
+        final HttpRequest request = getRequest(Command.sendall, """
+                %s,%s,"%s",%s,%s\
+                """.formatted(getRecipients(recipientsUnspecified, recipientsSpecified),
                 confirmationTarget,
                 estimateMode.toString(),
                 feeRate,
@@ -2033,6 +2107,21 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
                 """.formatted(hexTran, arrayToStr(prevTxs, this::prevTxsToStr), sigHashType.getVal()));
         return send(request, HttpResponse.BodyHandlers.ofInputStream())
                 .thenApply(parsers::parseJrSignTransactionResult)
+                .thenApply(this::checkRpcResponse);
+    }
+
+    @Override
+    public CompletableFuture<SimulateRawTransactionInfo> simulateRawTransaction(
+            List<String> rawTxs,
+            Boolean includeWatchOnly) {
+        String params = includeWatchOnly != null
+                ? """
+                %s,%s\
+                """.formatted(setParams(rawTxs), simulateRawTransactionOptionsToStr(includeWatchOnly))
+                : setParams(rawTxs);
+        final HttpRequest request = getRequest(Command.simulaterawtransaction, params);
+        return send(request, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(parsers::parseJrSimulateRawTransactionInfo)
                 .thenApply(this::checkRpcResponse);
     }
 
@@ -2390,7 +2479,7 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
         return "{" + join(",", items) + "}";
     }
 
-    private String lockUnspentTxToStr(Transaction transaction) {
+    private String unspentTxToStr(Transaction transaction) {
         requireNonNull(transaction.txId());
         return """
                 {"txid":"%s","vout":%d}\
@@ -2516,6 +2605,12 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
         return "{" + join(",", items) + "}";
     }
 
+    private String simulateRawTransactionOptionsToStr(Boolean includeWatchOnly) {
+        return """
+                {"include_watchonly":%b}\
+                """.formatted(includeWatchOnly);
+    }
+
     private String mapToObj(Map<String, String> outputs) {
         List<String> sendOutputs = itemList(outputs);
         return "{" + join(",", sendOutputs) + "}";
@@ -2534,6 +2629,14 @@ public class BitcoinProxyAsync implements BtcRpcAsync {
     private String getSendOutputParam(Map<String, String> outputs) {
         List<String> sendOutputs = outputsList(outputs);
         return "[" + join(",", sendOutputs) + "]";
+    }
+
+    private String getRecipients(List<String> unspecified, Map<String, String> specified) {
+        var unspecifiedItems = join(",", unspecified.stream().map(BitcoinProxyAsync::jsonStr).toList());
+        var specifiedItems = specified != null && !specified.isEmpty() ?
+                "," + join(",", outputsList(specified)) : "";
+
+        return "[" + unspecifiedItems + specifiedItems + "]";
     }
 
     private <T> String arrayToStr(List<T> items, Function<T, String> mapper) {

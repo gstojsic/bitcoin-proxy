@@ -4,7 +4,6 @@ import io.github.gstojsic.bitcoin.proxy.json.model.MempoolData;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolInfo;
 import io.github.gstojsic.bitcoin.proxy.json.model.MempoolWithSeq;
 import io.github.gstojsic.bitcoin.proxy.model.PsbtDescriptor;
-import io.github.gstojsic.bitcoin.proxy.model.ScanTxAction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -141,7 +140,7 @@ public class MempoolTest extends BitcoinDockerBase {
                 new PsbtDescriptor(seven.getDesc(), null)
         );
 
-        var res = bob.scanTxOutset(ScanTxAction.start, scanObjects);
+        var res = bob.scanTxOutset(scanObjects);
         assertNotNull(res);
         assertTrue(res.isSuccess());
         assertEquals(2, res.getUnspents().size());
