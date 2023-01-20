@@ -1,7 +1,7 @@
 # bitcoin-proxy
 bitcoin-proxy is a java JSON-RPC client that allows access to bitcoin nodes from java applications. It features:
 
-- bitcoin v23 JSON-RPC API
+- bitcoin v24 JSON-RPC API
 - sync and async client
 - small footprint (less than 700kB)
 - no external dependencies
@@ -37,6 +37,9 @@ var proxy = new BitcoinProxy(
       null);
 var uptime = proxy.uptime();
 ```
+## related projects
+If you need to process zmq notifications from your bitcoin node in your java application, checkout [bitcoin-zmq][bitcoin-zmq]
+
 ## acknowledgments
 - to bitcoin core developers for the great service they provide to the community.
 - to the good people at BlockchainCommons for the very good [book][bitcoinCliBook] on how to use bitcoin from the
@@ -45,3 +48,4 @@ command line from which I derived many of the tests in the project.
 [bitcoinDoc]: https://github.com/bitcoin/bitcoin/tree/master/doc#setup
 [bitcoinCliBook]: https://github.com/BlockchainCommons/Learning-Bitcoin-from-the-Command-Line
 [testcontainers]: https://www.testcontainers.org/
+[bitcoin-zmq]: https://github.com/gstojsic/bitcoin-zmq
